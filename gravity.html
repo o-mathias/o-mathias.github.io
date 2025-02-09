@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        
+    </head>
+    <body>
+        <div onclick="cursorPos(event)">
+            <canvas id="myCanvas" width="1920" height="900"></canvas>
+        </div>
+    </body>
+    <script>
+
+        
+        var c = document.getElementById("myCanvas");
+        var ctx = c.getContext("2d");
+        var width = parseInt(c.width);
+        var height = parseInt(c.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0,0,width,height);
+        
+
+        var n_circles = 1000; //numero de circulos
+        var delta_t = 0.03;  //delta T - variação de tempo entre cada calculo
+        var colors = ["cyan", "#d81159", "#8f2d56", "#218380", "#73d2de", "green", "gray", "purple", "pink", "orange"]
+
+        var circles = [];
+
+
+        function cursorPos(event){
+            if (circles.length > n_circles){
+                circles.pop();
+            }
+            var objMouse = {"x":event.clientX, "y":event.clientY, "vx":0, "vy":0,"m":100, "c":"rgba(20, 22, 250,0.01)"};
+            //console.log(objMouse)
+            circles.push(objMouse);  
+            //console.log(circles)          ;
+        }
+
+        //cria os circulos
+        for (var i = 0; i<n_circles; i++){
+            ctx.beginPath();
+            var x = Math.floor(Math.random() * width);
+            var y = Math.floor(Math.random() * height);
+            var m = Math.floor(Math.random() * 5); //tipos de particula
+            var obj = {"x":x, "y":y, "vx":0, "vy":0,"m":m+1, "c":colors[m]}
+            circles.push(obj)
+            ctx.arc(x, y, m, 0, 2 * Math.PI);
+            ctx.fillStyle = colors[m];
+            ctx.fill();
+            ctx.stroke();
+        }
+        
+        //calcula as interacoes
+        const id = setInterval(() => {
+            for (var i = 0; i<circles.length; i++){
+                var ax = 0;
+                var ay = 0;
+                for (var j = 0; j<circles.length; j++){
+                    
+                    if (j != i){
+                        //distancia
+                        var dx = circles[i].x - circles[j].x;
+                        var dy = circles[i].y - circles[j].y;
+
+                        var mod_dx = Math.abs(dx)
+                        var mod_dy = Math.abs(dy)
+                        //considera apenas os vizinhos que estão na distância máxima de 99 px
+                        if (Math.sqrt(mod_dx**2 + mod_dy**2)<100 && Math.sqrt(mod_dx**2 + mod_dy**2)>1){
+                            
+                            //direcao do movimento
+                            var opx = dx < 0 ? 1 : -1;
+                            var opy = dy < 0 ? 1 : -1;
+
+                            //FORMULAS PARA CALCULO DE ACELERACAO
+                            //SE MUDAR A FORMULA O RESULTADO É COMPLETAMENTE DIFERENTE
+                            //PODE SER NECESSÁRIO AUMENTAR OU DIMINUIR O DELTA T
+
+                            //ax += circles[j].m/mod_dx*opx; //massa / distância
+                            //ay += circles[j].m/mod_dx*opy;
+
+                            ax += ((-0.09 * (mod_dx**2) + 20 * mod_dx - 200)/circles[i].m)*opx; //equação quadrática
+                            ay += ((-0.09 * (mod_dy**2) + 20 * mod_dy - 200)/circles[i].m)*opy;
+
+                            //ax += ((circles[i].m*circles[j].m)/(mod_dx**2))*opx*10000
+                            //ay += ((circles[i].m*circles[j].m)/(mod_dy**2))*opy*10000
+                            
+                        }
+                    }
+                }
+                
+                x = circles[i].x + circles[i].vx * delta_t + (ax*delta_t**2)/2;
+                y = circles[i].y + circles[i].vy * delta_t + (ay*delta_t**2)/2;
+                if(x > width || x < 0){
+                    x = width;
+                    circles[i].vx *= -1;
+                }
+                if(y > height || y < 0){
+                    y = height;
+                    circles[i].vy *= -1;
+                }
+                circles[i].vx = (ax * delta_t + circles[i].vx)*0.9; //a constante 0.9 garante que se formem conglomerados pois atenua a velocidade
+                circles[i].vy = (ay * delta_t + circles[i].vy)*0.9;
+                circles[i].x = x;
+                circles[i].y = y;
+            }
+            //ctx.clearRect(0, 0,width, height); //se comentado fará com que seja possivel ver o caminho de cada circulo
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(0,0,width,height);
+            //atualiza a posicao dos circulos
+            for (var i = 0; i<circles.length; i++){
+                    ctx.beginPath();
+                    x = circles[i].x;
+                    y = circles[i].y;
+                    m = circles[i].m//Math.log(Math.sqrt(circles[i].vx**2+circles[i].vx**2))+1; 
+                    c = circles[i].c;
+                    ctx.arc(x, y, m, 0, 2 * Math.PI);
+                    ctx.fillStyle = c;
+                    ctx.fill();
+                    ctx.lineWidth = 0;
+                    ctx.closePath();
+                    //ctx.stroke();
+                } 
+        }, 12);
+    </script>
+</html>
