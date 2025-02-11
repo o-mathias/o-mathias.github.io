@@ -19,10 +19,10 @@
         ctx.fillRect(0,0,width,height);
         
 
-        var n_circles = 1000; //numero de circulos
-        var delta_t = 0.03;  //delta T - variação de tempo entre cada calculo
+        var n_circles = 500; //numero de circulos
+        var delta_t = 0.04;  //delta T - variação de tempo entre cada calculo
         var colors = ["cyan", "#d81159", "#8f2d56", "#218380", "#73d2de", "green", "gray", "purple", "pink", "orange"]
-        var shadows = ['', 'darkred', 'darkred', 'darkgreen', 'darkblue', '#c1ffb3', 'white', 'pink', 'lightpink', 'yellow']
+        var shadows = ['white', 'red', 'purple', 'green', 'blue', '#c1ffb3', 'white', 'pink', 'lightpink', 'yellow']
 
         var circles = [];
 
@@ -39,16 +39,11 @@
 
         //cria os circulos
         for (var i = 0; i<n_circles; i++){
-            ctx.beginPath();
             var x = Math.floor(Math.random() * width);
             var y = Math.floor(Math.random() * height);
             var m = Math.floor(Math.random() * 5); //tipos de particula
             var obj = {"x":x, "y":y, "vx":0, "vy":0,"m":m+1, "c":colors[m], "s":shadows[m]}
             circles.push(obj)
-            ctx.arc(x, y, m, 0, 2 * Math.PI);
-            ctx.fillStyle = colors[m];
-            ctx.fill();
-            ctx.stroke();
         }
         
         //calcula as interacoes
@@ -115,15 +110,16 @@
                     y = circles[i].y;
                     m = circles[i].m//Math.log(Math.sqrt(circles[i].vx**2+circles[i].vx**2))+1; 
                     c = circles[i].c;
+                    s = circles[i].s;
+                    ctx.shadowBlur = 10*(6-m);
+                    ctx.shadowColor = s;
                     ctx.arc(x, y, m, 0, 2 * Math.PI);
                     ctx.fillStyle = c;
                     ctx.fill();
                     ctx.lineWidth = 0;
-                    ctx.shadowBlur = 10*circles[i].m;
-                    ctx.shadowColor = circles[i].s;
                     ctx.closePath();
                     //ctx.stroke();
                 } 
-        }, 12);
+        }, 20);
     </script>
 </html>
